@@ -1,0 +1,14 @@
+Flask>=3.0.0 # Core web framework
+python-dotenv>=1.0.0 # For loading environment variables (optional but good practice)
+gunicorn>=21.2.0 # WSGI server for production (used by Cloud Run)
+
+# --- Database Drivers (Install as needed) ---
+# psycopg2-binary>=2.9.9 # For PostgreSQL
+# google-cloud-bigquery>=3.18.0 # For Google BigQuery
+# google-cloud-secret-manager>=2.18.1 # Recommended for managing secrets
+
+# --- Firebase Admin ---
+# firebase-admin>=6.5.0 # If backend needs to interact with Firebase (e.g., custom claims)
+
+# --- Stripe ---
+# stripe>=8.5.0 # For Stripe integration

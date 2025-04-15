@@ -1,0 +1,18 @@
+{
+    "short_name": "React App",
+    "name": "React Firebase GCP Sample App",
+    "icons": [
+      {
+        "src": "/vite.svg", // Replace with actual icons later
+        "sizes": "64x64 32x32 24x24 16x16",
+        "type": "image/svg+xml"
+      }
+      // Add more icons of different sizes (e.g., 192x192, 512x512) for PWA installation
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff"
+  }
+  
+  
