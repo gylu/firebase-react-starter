@@ -83,15 +83,6 @@ function App() {
       {/* Main Content Area */}
       <Grid container spacing={4} justifyContent="center">
 
-        {/* Image Carousel */}
-        <Grid item xs={12} md={8}>
-           <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-             <Typography variant="h5" component="h2" gutterBottom align="center">
-               Image Carousel
-             </Typography>
-           </Paper>
-        </Grid>
-
         {/* Forms Section */}
         <Grid item xs={12} container spacing={4} justifyContent="center">
           {/* Firebase Form */}
