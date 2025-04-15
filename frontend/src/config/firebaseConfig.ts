@@ -2,10 +2,10 @@ import { initializeApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 
-// TODO: Replace with your actual Firebase project configuration
+// Placeholder configuration - Replace with your actual Firebase project configuration
 // You get this from the Firebase Console when you add a web app to your project
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "YOUR_API_KEY", // Intentionally keep placeholders
   authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
   projectId: "YOUR_PROJECT_ID",
   storageBucket: "YOUR_PROJECT_ID.appspot.com",
@@ -14,21 +14,30 @@ const firebaseConfig = {
   // measurementId: "YOUR_MEASUREMENT_ID" // Optional: for Google Analytics
 };
 
-// Initialize Firebase
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
+let firebaseInitialized = false;
 
 try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  console.log("Firebase initialized successfully.");
+  // Check if the config values are placeholders (simple check)
+  if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('YOUR_') && firebaseConfig.projectId && !firebaseConfig.projectId.startsWith('YOUR_')) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    firebaseInitialized = true;
+    console.log("Firebase initialized successfully.");
+  } else {
+    console.warn("Firebase configuration appears to be placeholder data. Firebase services will be unavailable. Please update src/config/firebaseConfig.ts.");
+  }
 } catch (error) {
   console.error("Firebase initialization error:", error);
-  // Handle initialization error appropriately (e.g., show a message to the user)
-  // Assign dummy objects or throw error to prevent app crash if needed elsewhere
-  // For simplicity here, we'll let potential errors propagate if accessed later.
+  console.warn("Firebase services will be unavailable due to initialization error.");
+  // Ensure app, auth, db remain null if initialization fails
+  app = null;
+  auth = null;
+  db = null;
 }
 
-export { app, auth, db };
+// Export the potentially null objects and the initialization status
+export { app, auth, db, firebaseInitialized };

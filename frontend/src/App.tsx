@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, Box, CircularProgress, Alert, Grid, Paper } from '@mui/material';
-import { auth } from './config/firebaseConfig'; // Import auth object
+import { auth, firebaseInitialized } from './config/firebaseConfig'; // Import auth object AND initialization status
 import { User, onAuthStateChanged } from 'firebase/auth';
 
 // Import Components
@@ -13,34 +13,46 @@ import StripeForm from './components/StripeForm';
 function App() {
   // State to hold the current user
   const [user, setUser] = useState<User | null>(null);
-  // State to track loading status during auth check
-  const [loading, setLoading] = useState<boolean>(true);
+  // State to track loading status (now defaults to false if Firebase isn't initialized)
+  const [loading, setLoading] = useState<boolean>(firebaseInitialized); // Only true if Firebase might initialize
   // State for general errors
   const [error, setError] = useState<string | null>(null);
 
-  // Effect to listen for authentication state changes
+  // Effect to listen for authentication state changes ONLY if Firebase is initialized
   useEffect(() => {
-    // onAuthStateChanged returns an unsubscribe function
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // Set user to null if logged out, or User object if logged in
-      setLoading(false); // Finished loading auth state
-      setError(null); // Clear any previous auth errors
-      console.log("Auth State Changed:", currentUser ? currentUser.uid : 'No user');
-    }, (authError) => {
-      // Handle errors during listener setup or events
-      console.error("Auth state listener error:", authError);
-      setError("Error checking authentication status. Please refresh.");
+    let unsubscribe: (() => void) | null = null;
+
+    if (firebaseInitialized && auth) {
+      setLoading(true); // Start loading indicator since we will check auth state
+      // onAuthStateChanged returns an unsubscribe function
+      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser); // Set user to null if logged out, or User object if logged in
+        setLoading(false); // Finished loading auth state
+        setError(null); // Clear any previous auth errors
+        console.log("Auth State Changed:", currentUser ? currentUser.uid : 'No user');
+      }, (authError) => {
+        // Handle errors during listener setup or events
+        console.error("Auth state listener error:", authError);
+        setError("Error checking authentication status.");
+        setLoading(false);
+      });
+    } else {
+      // If Firebase isn't initialized, we're not loading auth state
       setLoading(false);
-    });
+    }
 
     // Cleanup function to unsubscribe when the component unmounts
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []); // Empty dependency array ensures this runs only once on mount
 
   // --- Render Logic ---
 
-  // Show loading indicator while checking auth state
-  if (loading) {
+  // Show loading indicator ONLY if Firebase was initialized and we are waiting for auth state
+  if (loading && firebaseInitialized) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />
@@ -50,16 +62,23 @@ function App() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {/* Display warning if Firebase is not configured */}
+      {!firebaseInitialized && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Firebase is not configured. Authentication and Firestore features are disabled. Please update <code>src/config/firebaseConfig.ts</code> and restart the app.
+        </Alert>
+      )}
       {/* Display general errors */}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
 
       {/* Header Section */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography variant="h3" component="h1" gutterBottom>
           Hello World!
         </Typography>
-        {/* Authentication Buttons */}
-        <AuthButtons user={user} />
+        {/* Pass potentially null auth and user state to AuthButtons */}
+        <AuthButtons user={user} auth={auth} firebaseInitialized={firebaseInitialized} />
       </Box>
 
       {/* Main Content Area */}
@@ -83,7 +102,8 @@ function App() {
                <Typography variant="h6" component="h3" gutterBottom>
                  Send Data to Firebase Firestore
                </Typography>
-               <FirebaseForm />
+               {/* Pass firebaseInitialized status to the form */}
+               <FirebaseForm firebaseInitialized={firebaseInitialized} />
              </Paper>
           </Grid>
 

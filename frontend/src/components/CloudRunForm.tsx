@@ -11,17 +11,18 @@ interface IFormInput {
 }
 
 const CloudRunForm: React.FC = () => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<IFormInput>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<IFormInput>();
+  const loading = isSubmitting; // Use react-hook-form's state
+  const [formError, setFormError] = useState<string | null>(null); // For general/submission errors
+  const [configError, setConfigError] = useState<string | null>(null); // Specific error for config issue
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning'>('success');
 
   // Function to handle form submission
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    setLoading(true);
-    setFormError(null);
+    setFormError(null); // Clear previous submission errors
+    setConfigError(null); // Clear previous config errors
 
     try {
       // Call the API service function
@@ -34,17 +35,22 @@ const CloudRunForm: React.FC = () => {
     } catch (err: any) {
       console.error('Error sending data via API service: ', err);
       // Check if the error is the specific 'not configured' error
-      if (err.message === 'Cloud Run URL not configured.') {
-           setFormError('Cloud Run backend URL is not configured in src/services/api.ts.');
+      const configErrorMessage = 'Cloud Run URL not configured.';
+      if (err.message === configErrorMessage) {
+           // Set the specific config error state to display a persistent warning
+           setConfigError('Cloud Run backend URL is not configured in src/services/api.ts.');
+           setSnackbarMessage(configErrorMessage); // Show in snackbar too
+           setSnackbarSeverity('warning');
       } else {
-           setFormError(err.response?.data?.error || err.message || 'Failed to send data. Check console for details.');
+           // Handle other submission errors
+           const errorMessage = err.response?.data?.error || err.message || 'Failed to send data. Check console for details.';
+           setFormError(errorMessage);
+           setSnackbarMessage(errorMessage);
+           setSnackbarSeverity('error');
       }
-      setSnackbarMessage(formError || 'Failed to send data.'); // Show error in snackbar too
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
-    } finally {
-      setLoading(false);
+      setSnackbarOpen(true); // Open snackbar for both config and other errors
     }
+    // react-hook-form handles loading state
   };
 
    // Handle Snackbar close
@@ -62,10 +68,10 @@ const CloudRunForm: React.FC = () => {
       sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       noValidate
     >
-      {/* Display persistent error related to configuration */}
-      {formError && formError.includes('not configured') && <Alert severity="warning">{formError}</Alert>}
+      {/* Display persistent warning if Cloud Run URL is not configured */}
+      {configError && <Alert severity="warning" sx={{mb: 1}}>{configError}</Alert>}
       {/* Display temporary submission errors */}
-      {formError && !formError.includes('not configured') && <Alert severity="error">{formError}</Alert>}
+      {formError && <Alert severity="error">{formError}</Alert>}
 
 
       <TextField
@@ -82,7 +88,7 @@ const CloudRunForm: React.FC = () => {
         })}
         error={!!errors.email}
         helperText={errors.email?.message}
-        disabled={loading}
+        disabled={loading} // Disable while submitting
       />
 
       <TextField
@@ -94,14 +100,14 @@ const CloudRunForm: React.FC = () => {
         {...register('feedback', { required: 'Feedback cannot be empty' })}
         error={!!errors.feedback}
         helperText={errors.feedback?.message}
-        disabled={loading}
+        disabled={loading} // Disable while submitting
       />
 
       <Button
         type="submit"
         variant="contained"
         color="primary"
-        disabled={loading}
+        disabled={loading} // Disable while submitting
         startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
         sx={{ alignSelf: 'flex-end' }}
       >
@@ -111,10 +117,11 @@ const CloudRunForm: React.FC = () => {
        {/* Feedback Snackbar */}
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={6000} // Longer duration for errors
+        autoHideDuration={6000} // Longer duration for errors/warnings
         onClose={handleSnackbarClose}
          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
+        {/* Ensure Alert is included for Snackbar content */}
         <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
