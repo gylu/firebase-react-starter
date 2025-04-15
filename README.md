@@ -31,7 +31,8 @@ This repository provides a template and working example for rapidly developing a
 
 ## Project Structure
 
-````
+
+```
 .
 ├── .gitignore
 ├── README.md
@@ -65,6 +66,7 @@ This repository provides a template and working example for rapidly developing a
     ├── tsconfig.node.json
     └── vite.config.ts
 ```
+
 
 ## 1. Getting Started: Cloning the Repo
 
