@@ -31,7 +31,7 @@ This repository provides a template and working example for rapidly developing a
 
 ## Project Structure
 
-\`\`\`
+````
 .
 ├── .gitignore
 ├── README.md
@@ -64,16 +64,16 @@ This repository provides a template and working example for rapidly developing a
     ├── tsconfig.json
     ├── tsconfig.node.json
     └── vite.config.ts
-\`\`\`
+```
 
 ## 1. Getting Started: Cloning the Repo
 
 Clone this repository to your local machine:
 
-\`\`\`bash
+```bash
 git clone <your-repository-url> # Replace with the actual URL after you create it
 cd <repository-directory-name>
-\`\`\`
+```
 
 ## 2. Setting Up Firebase
 
@@ -99,7 +99,7 @@ cd <repository-directory-name>
     * Open the `frontend/src/config/firebaseConfig.ts` file.
     * **Replace the placeholder `firebaseConfig` object with the actual configuration you copied in step 2.**
 
-    \`\`\`typescript
+    ```typescript
     // frontend/src/config/firebaseConfig.ts
     import { initializeApp } from "firebase/app";
     import { getAuth } from "firebase/auth";
@@ -121,7 +121,7 @@ cd <repository-directory-name>
     const db = getFirestore(app);
 
     export { app, auth, db };
-    \`\`\`
+    ```
 
 6.  **Install Firebase CLI:**
     * If you don't have it, install the Firebase CLI: `npm install -g firebase-tools`
@@ -145,47 +145,47 @@ This section is only needed if you intend to use the separate Python backend.
 3.  **Install Google Cloud CLI (gcloud):**
     * Follow the instructions to [install the gcloud CLI](https://cloud.google.com/sdk/docs/install).
     * Initialize the CLI and authenticate:
-        \`\`\`bash
+        ```bash
         gcloud init
         gcloud auth login
         gcloud config set project YOUR_PROJECT_ID # Replace with your GCP Project ID
-        \`\`\`
+        ```
 
 ## 4. Running the Frontend Locally
 
 1.  **Navigate to the frontend directory:**
-    \`\`\`bash
+    ```bash
     cd frontend
-    \`\`\`
+    ```
 2.  **Install dependencies:**
-    \`\`\`bash
+    ```bash
     npm install
-    \`\`\`
+    ```
 3.  **Start the development server:**
-    \`\`\`bash
+    ```bash
     npm run dev
-    \`\`\`
+    ```
     This will usually open the app in your browser at `http://localhost:5173` (or another port if 5173 is busy). You should see the "Hello World" title, the carousel, and the forms. Authentication and the Firebase form should work if you configured `firebaseConfig.ts` correctly. The Cloud Run form will fail until the backend is deployed.
 
 ## 5. Running the Backend Locally (Optional)
 
 1.  **Navigate to the backend directory:**
-    \`\`\`bash
+    ```bash
     cd ../backend # Or cd backend from the root
-    \`\`\`
+    ```
 2.  **Set up a virtual environment (Recommended):**
-    \`\`\`bash
+    ```bash
     python -m venv venv
     source venv/bin/activate  # On Windows use \`venv\\Scripts\\activate\`
-    \`\`\`
+    ```
 3.  **Install dependencies:**
-    \`\`\`bash
+    ```bash
     pip install -r requirements.txt
-    \`\`\`
+    ```
 4.  **Run the Flask app:**
-    \`\`\`bash
+    ```bash
     flask run --port=8080
-    \`\`\`
+    ```
     The backend will be running at `http://localhost:8080`.
 
 5.  **Update Frontend API URL (for local testing):**
@@ -195,18 +195,18 @@ This section is only needed if you intend to use the separate Python backend.
 ## 6. Deploying the Backend to Cloud Run (Optional)
 
 1.  **Navigate to the backend directory:**
-    \`\`\`bash
+    ```bash
     cd backend # If not already there
-    \`\`\`
+    ```
 2.  **Deploy using gcloud:**
-    \`\`\`bash
+    ```bash
     gcloud run deploy my-backend-service \\
         --source . \\
         --platform managed \\
         --region YOUR_REGION \\
         --allow-unauthenticated \\
         --project YOUR_PROJECT_ID
-    \`\`\`
+    ```
     * Replace `my-backend-service` with your desired service name.
     * Replace `YOUR_REGION` with a GCP region (e.g., `us-central1`).
     * Replace `YOUR_PROJECT_ID` with your GCP Project ID.
@@ -216,28 +216,28 @@ This section is only needed if you intend to use the separate Python backend.
     * Open `frontend/src/services/api.ts`.
     * **Replace the placeholder `cloudRunUrl` with the actual URL of your deployed Cloud Run service.** Make sure it includes the correct path (e.g., `https://your-service-url.a.run.app/api/data`).
 
-    \`\`\`typescript
+    ```typescript
     // frontend/src/services/api.ts
     // TODO: Replace with your deployed Cloud Run service URL
     const cloudRunUrl = 'YOUR_CLOUD_RUN_SERVICE_URL/api/data';
     // Example: const cloudRunUrl = '[https://my-backend-service-abcde12345-uc.a.run.app/api/data](https://my-backend-service-abcde12345-uc.a.run.app/api/data)';
-    \`\`\`
+    ```
 
 ## 7. Deploying the Frontend to Firebase Hosting
 
 1.  **Navigate to the frontend directory:**
-    \`\`\`bash
+    ```bash
     cd frontend # If not already there
-    \`\`\`
+    ```
 2.  **Build the production version:**
-    \`\`\`bash
+    ```bash
     npm run build
-    \`\`\`
+    ```
     This creates an optimized build in the `frontend/dist` directory.
 3.  **Deploy to Firebase Hosting:**
-    \`\`\`bash
+    ```bash
     firebase deploy --only hosting
-    \`\`\`
+    ```
     * The first time you run this, the Firebase CLI might ask you to configure hosting settings:
         * Select the Firebase project you created earlier.
         * Specify `dist` as the public directory.
@@ -278,7 +278,7 @@ Use your code editor's search and replace functionality or command-line tools li
 
 **Example using `sed` (use with caution, backup first!):**
 
-\`\`\`bash
+```bash
 # Example: Replace Project ID in gcloud commands within README.md (macOS/BSD sed)
 sed -i '' 's/YOUR_PROJECT_ID/my-actual-gcp-project-id/g' README.md
 
@@ -286,7 +286,7 @@ sed -i '' 's/YOUR_PROJECT_ID/my-actual-gcp-project-id/g' README.md
 sed -i 's/YOUR_PROJECT_ID/my-actual-gcp-project-id/g' README.md
 
 # It's often safer to manually replace in config files like firebaseConfig.ts
-\`\`\`
+```
 
 ## 10. Static File Hosting (Firebase Hosting vs. Cloudflare)
 
