@@ -5,7 +5,6 @@ import { User, onAuthStateChanged } from 'firebase/auth';
 
 // Import Components
 import AuthButtons from './components/AuthButtons';
-import ImageCarousel from './components/ImageCarousel';
 import FirebaseForm from './components/FirebaseForm';
 import CloudRunForm from './components/CloudRunForm';
 import StripeForm from './components/StripeForm';
@@ -90,7 +89,6 @@ function App() {
              <Typography variant="h5" component="h2" gutterBottom align="center">
                Image Carousel
              </Typography>
-            <ImageCarousel />
            </Paper>
         </Grid>
 

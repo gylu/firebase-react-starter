@@ -163,6 +163,12 @@ This section is only needed if you intend to use the separate Python backend.
     ```bash
     npm install
     ```
+
+    run this to restart
+    ```bash
+    rm -rf node_modules package-lock.json # Use 'del node_modules package-lock.json /s /q' on Windows CMD
+    ```
+
 3.  **Start the development server:**
     ```bash
     npm run dev
