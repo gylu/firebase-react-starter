@@ -38,7 +38,7 @@ This repository provides a template and working example for rapidly developing a
 ├── README.md
 ├── backend/
 │   ├── Dockerfile
-│   ├── main.py             # Flask application
+│   ├── app.py             # Flask application
 │   └── requirements.txt    # Python dependencies
 └── frontend/
     ├── public/
@@ -279,7 +279,7 @@ Use your code editor's search and replace functionality or command-line tools li
 
 * `frontend/src/config/firebaseConfig.ts`: Replace the entire `firebaseConfig` object.
 * `frontend/src/services/api.ts`: Replace `YOUR_CLOUD_RUN_SERVICE_URL`.
-* `backend/main.py`:
+* `backend/app.py`:
     * Replace placeholder database connection strings/credentials (ideally load from environment variables or Secret Manager).
     * Replace `YOUR_STRIPE_SECRET_KEY` (load from environment variables/Secret Manager).
 * `README.md` (This file) and Deployment Commands: Replace `YOUR_PROJECT_ID`, `YOUR_REGION`, `my-backend-service`, etc., where applicable in the commands.

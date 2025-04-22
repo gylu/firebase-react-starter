@@ -1,6 +1,7 @@
 Flask>=3.0.0 # Core web framework
 python-dotenv>=1.0.0 # For loading environment variables (optional but good practice)
 gunicorn>=21.2.0 # WSGI server for production (used by Cloud Run)
+flask_cors
 
 # --- Database Drivers (Install as needed) ---
 # psycopg2-binary>=2.9.9 # For PostgreSQL
