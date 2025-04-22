@@ -1,33 +1,29 @@
+// /home/firebase-react-starter/frontend/tsconfig.node.json
 {
-    "compilerOptions": {
-      "target": "ES2020", // Modern target
-      "useDefineForClassFields": true,
-      "lib": ["ES2020", "DOM", "DOM.Iterable"],
-      "module": "ESNext",
-      "skipLibCheck": true,
-  
-      /* Bundler mode */
-      "moduleResolution": "bundler", // Recommended for Vite
-      "allowImportingTsExtensions": true,
-      "resolveJsonModule": true,
-      "isolatedModules": true,
-      "noEmit": true, // Vite handles emission
-      "jsx": "react-jsx", // Modern JSX transform
-  
-      /* Linting */
-      "strict": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "noFallthroughCasesInSwitch": true,
-      "forceConsistentCasingInFileNames": true, // Important for cross-platform compatibility
-  
-      /* Aliases (Optional but useful) */
-      "baseUrl": ".",
-      "paths": {
-        "@/*": ["src/*"]
-      }
-    },
-    "include": ["src", "vite.config.ts"], // Include vite config for type checking
-    "references": [{ "path": "./tsconfig.node.json" }]
-  }
-  
+  "compilerOptions": {
+    "composite": true,                   // REQUIRED for project references
+    "skipLibCheck": true,
+    "module": "ESNext",                  // Keep as is for now, NodeNext/CommonJS could also work
+    "moduleResolution": "bundler",       // Keep as is for now, 'node' or 'nodenext' often used here
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "target": "ES2020",                  // Keep consistent target
+    // --- Changes ---
+    // "noEmit": true,                   // REMOVE this line or change to emitDeclarationOnly
+    "emitDeclarationOnly": true,       // ADD this line (preferred)
+    "allowImportingTsExtensions": true, // Keep if needed for your vite.config.ts imports
+    "resolveJsonModule": true           // Keep if needed for your vite.config.ts imports
+    // Remove options not relevant to vite.config.ts like:
+    // "useDefineForClassFields"
+    // "lib" (unless vite.config.ts uses DOM types specifically)
+    // "jsx"
+    // "noUnusedLocals" (optional, but often fine to keep)
+    // "noUnusedParameters" (optional, but often fine to keep)
+    // "noFallthroughCasesInSwitch" (optional, but often fine to keep)
+    // "forceConsistentCasingInFileNames" (good practice)
+    // "baseUrl" and "paths" (not typically needed for vite.config.ts)
+  },
+  // --- Changes ---
+  "include": ["vite.config.ts"],         // ONLY include Node-specific files
+  // "references": [...]                 // REMOVE this self-reference
+}

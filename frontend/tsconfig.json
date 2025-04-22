@@ -1,37 +1,40 @@
+// /home/firebase-react-starter/frontend/tsconfig.json
 {
-    "compilerOptions": {
-      "target": "ES2020", // Modern target
-      "composite": true,
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
 
-      "useDefineForClassFields": true,
-      "lib": ["ES2020", "DOM", "DOM.Iterable"],
-      "module": "ESNext",
-      "allowSyntheticDefaultImports": true,
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,                   // Keep noEmit here, Vite handles the build
+    "jsx": "react-jsx",
 
-      "skipLibCheck": true,
-  
-      /* Bundler mode */
-      "moduleResolution": "bundler", // Recommended for Vite
-      "allowImportingTsExtensions": true,
-      "resolveJsonModule": true,
-      "isolatedModules": true,
-      "noEmit": true, // Vite handles emission
-      "jsx": "react-jsx", // Modern JSX transform
-  
-      /* Linting */
-      "strict": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "noFallthroughCasesInSwitch": true,
-      "forceConsistentCasingInFileNames": true, // Important for cross-platform compatibility
-  
-      /* Aliases (Optional but useful) */
-      "baseUrl": ".",
-      "paths": {
-        "@/*": ["src/*"]
-      }
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
     },
-    "include": ["src", "vite.config.ts"], // Include vite config for type checking
-    "references": [{ "path": "./tsconfig.node.json" }]
-  }
-  
+
+    // --- Ensure composite is false IF you fix tsconfig.node.json as above AND don't use tsc --build ---
+    // OR Keep composite: true if you *do* use `tsc --build` with project references
+    "composite": true // Keep if you intend to use `tsc --build` for checking both projects
+                      // Can potentially be set to false if you only rely on Vite/IDE checks.
+  },
+  // --- Changes ---
+  "include": ["src"],                  // ONLY include your application source code
+  "references": [{ "path": "./tsconfig.node.json" }] // Keep the reference
+}
