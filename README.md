@@ -118,42 +118,18 @@ cd <repository-directory-name>
 4.  **Install Firebase CLI:**
     * If you don't have it, install the Firebase CLI: `npm install -g firebase-tools`
     * Log in to Firebase: `firebase login`
-5.  **(Optional) Enable Authentication Methods:**
+5.  **Enable Authentication Methods:**
     * In the Firebase Console, go to "Authentication" (under Build).
     * Click the "Sign-in method" tab.
     * Enable the "Google" provider. Provide a project support email.
     * Enable the "Phone" provider. You might need to configure authorized domains for reCAPTCHA verification if prompted (Firebase Hosting domains are usually authorized by default).
-6.  **(Optional)Set Up Firestore:**
+6.  **Set Up Firestore:**
     * Go to "Firestore Database" (under Build).
     * Click "Create database".
     * Choose **Start in test mode** for initial development (allows reads/writes without authentication rules). **Remember to set up proper security rules before going live!**
     * Select a location for your database (choose one close to your users).
 
-## 3. Setting Up Google Cloud Platform (for Cloud Run Backend)
-
-This section is only needed if you intend to use the separate Python backend.
-
-1.  **Create a GCP Project:**
-    * Go to the [Google Cloud Console](https://console.cloud.google.com/).
-    * Create a new project or select an existing one. Note your **Project ID**.
-2.  **Enable APIs:**
-    * In the Cloud Console, navigate to "APIs & Services" > "Library".
-    * Search for and enable the following APIs:
-        * Cloud Run API
-        * Cloud Build API (usually enabled by default, needed for deployment)
-        * Secret Manager API (Recommended for storing secrets like DB passwords, API keys)
-        * (Optional) Cloud SQL Admin API (if using Cloud SQL for PostgreSQL)
-        * (Optional) BigQuery API (if using BigQuery)
-3.  **Install Google Cloud CLI (gcloud):**
-    * Follow the instructions to [install the gcloud CLI](https://cloud.google.com/sdk/docs/install).
-    * Initialize the CLI and authenticate:
-        ```bash
-        gcloud init
-        gcloud auth login
-        gcloud config set project YOUR_PROJECT_ID # Replace with your GCP Project ID
-        ```
-
-## 4. Running the Frontend Locally
+## 3. Running the Frontend Locally
 
 1.  **Navigate to the frontend directory:**
     ```bash
@@ -175,7 +151,47 @@ This section is only needed if you intend to use the separate Python backend.
     ```
     This will usually open the app in your browser at `http://localhost:5173` (or another port if 5173 is busy). You should see the "Hello World" title, the carousel, and the forms. Authentication and the Firebase form should work if you configured `firebaseConfig.ts` correctly. The Cloud Run form will fail until the backend is deployed.
 
-## 5. Running the Backend Locally (Optional)
+## 4. Deploying the Frontend to Firebase Hosting
+
+1.  **Navigate to the frontend directory:**
+    ```bash
+    cd frontend # If not already there
+    ```
+2.  **Build the production version:**
+    ```bash
+    npm run build
+    ```
+    This creates an optimized build in the `frontend/dist` directory.
+3.  **Deploy to Firebase Hosting:**
+    ```bash
+    firebase deploy --only hosting
+    ```
+    * The first time you run this, the Firebase CLI might ask you to configure hosting settings:
+        * Select the Firebase project you created earlier.
+        * Specify `dist` as the public directory.
+        * Configure as a single-page app (SPA): **Yes** (important for React Router).
+        * Set up automatic builds and deploys with GitHub: **No** (for this manual setup).
+        * File `dist/index.html` already exists. Overwrite? **No** (or Yes, it doesn't matter much here as `npm run build` regenerates it).
+    * Firebase will provide you with the URL of your deployed site (e.g., `https://your-project-id.web.app`).
+
+## 5. Connecting a Custom Domain (Example: Namecheap)
+
+1.  **Add Domain in Firebase:**
+    * Go to your Firebase project's "Hosting" section.
+    * Click "Add custom domain".
+    * Enter the domain you own (e.g., `www.yourdomain.com` or `yourdomain.com`).
+    * Firebase will provide you with DNS records (usually TXT for verification and A records or CNAME records) to add to your domain registrar.
+2.  **Configure DNS in Namecheap:**
+    * Log in to your Namecheap account.
+    * Go to "Domain List" and click "Manage" next to your domain.
+    * Go to the "Advanced DNS" tab.
+    * Under "Host Records", click "Add New Record".
+    * Add the TXT record provided by Firebase for verification. Wait for verification (can take minutes to hours).
+    * Once verified, add the A records (or CNAME) provided by Firebase, pointing your domain to Firebase Hosting servers. Remove any conflicting default Namecheap records (like CNAME for `www` or A records for `@`).
+    * Wait for DNS propagation (can take up to 48 hours, but often much faster).
+3.  **Firebase Provisioning:** Firebase will automatically provision an SSL certificate for your custom domain once DNS is set up correctly.
+
+## 6. Running the Backend Locally (Optional)
 
 1.  **Navigate to the backend directory:**
     ```bash
@@ -200,7 +216,31 @@ This section is only needed if you intend to use the separate Python backend.
     * Temporarily change the `cloudRunUrl` in `frontend/src/services/api.ts` to `http://localhost:8080/api/data`.
     * Now, submitting the "Send to Cloud Run" form in the frontend should successfully send data to your local backend (check the backend console). Remember to change this back before deploying.
 
-## 6. Deploying the Backend to Cloud Run (Optional)
+## 7. Setting Up Google Cloud Platform (for Cloud Run Backend)
+
+This section is only needed if you intend to use the separate Python backend.
+
+1.  **Create a GCP Project:**
+    * Go to the [Google Cloud Console](https://console.cloud.google.com/).
+    * Create a new project or select an existing one. Note your **Project ID**.
+2.  **Enable APIs:**
+    * In the Cloud Console, navigate to "APIs & Services" > "Library".
+    * Search for and enable the following APIs:
+        * Cloud Run API
+        * Cloud Build API (usually enabled by default, needed for deployment)
+        * Secret Manager API (Recommended for storing secrets like DB passwords, API keys)
+        * (Optional) Cloud SQL Admin API (if using Cloud SQL for PostgreSQL)
+        * (Optional) BigQuery API (if using BigQuery)
+3.  **Install Google Cloud CLI (gcloud):**
+    * Follow the instructions to [install the gcloud CLI](https://cloud.google.com/sdk/docs/install).
+    * Initialize the CLI and authenticate:
+        ```bash
+        gcloud init
+        gcloud auth login
+        gcloud config set project YOUR_PROJECT_ID # Replace with your GCP Project ID
+        ```
+
+## 8. Deploying the Backend to Cloud Run (Optional)
 
 1.  **Navigate to the backend directory:**
     ```bash
@@ -230,46 +270,6 @@ This section is only needed if you intend to use the separate Python backend.
     const cloudRunUrl = 'YOUR_CLOUD_RUN_SERVICE_URL/api/data';
     // Example: const cloudRunUrl = '[https://my-backend-service-abcde12345-uc.a.run.app/api/data](https://my-backend-service-abcde12345-uc.a.run.app/api/data)';
     ```
-
-## 7. Deploying the Frontend to Firebase Hosting
-
-1.  **Navigate to the frontend directory:**
-    ```bash
-    cd frontend # If not already there
-    ```
-2.  **Build the production version:**
-    ```bash
-    npm run build
-    ```
-    This creates an optimized build in the `frontend/dist` directory.
-3.  **Deploy to Firebase Hosting:**
-    ```bash
-    firebase deploy --only hosting
-    ```
-    * The first time you run this, the Firebase CLI might ask you to configure hosting settings:
-        * Select the Firebase project you created earlier.
-        * Specify `dist` as the public directory.
-        * Configure as a single-page app (SPA): **Yes** (important for React Router).
-        * Set up automatic builds and deploys with GitHub: **No** (for this manual setup).
-        * File `dist/index.html` already exists. Overwrite? **No** (or Yes, it doesn't matter much here as `npm run build` regenerates it).
-    * Firebase will provide you with the URL of your deployed site (e.g., `https://your-project-id.web.app`).
-
-## 8. Connecting a Custom Domain (Example: Namecheap)
-
-1.  **Add Domain in Firebase:**
-    * Go to your Firebase project's "Hosting" section.
-    * Click "Add custom domain".
-    * Enter the domain you own (e.g., `www.yourdomain.com` or `yourdomain.com`).
-    * Firebase will provide you with DNS records (usually TXT for verification and A records or CNAME records) to add to your domain registrar.
-2.  **Configure DNS in Namecheap:**
-    * Log in to your Namecheap account.
-    * Go to "Domain List" and click "Manage" next to your domain.
-    * Go to the "Advanced DNS" tab.
-    * Under "Host Records", click "Add New Record".
-    * Add the TXT record provided by Firebase for verification. Wait for verification (can take minutes to hours).
-    * Once verified, add the A records (or CNAME) provided by Firebase, pointing your domain to Firebase Hosting servers. Remove any conflicting default Namecheap records (like CNAME for `www` or A records for `@`).
-    * Wait for DNS propagation (can take up to 48 hours, but often much faster).
-3.  **Firebase Provisioning:** Firebase will automatically provision an SSL certificate for your custom domain once DNS is set up correctly.
 
 ## 9. Replacing Placeholders & API Keys
 
