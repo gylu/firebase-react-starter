@@ -135,7 +135,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.git
 
 # Spyder project settings
 .spyderproject
@@ -209,6 +208,9 @@ env/
 # Build artifacts
 build/
 dist/
+# TypeScript build info
+tsconfig.tsbuildinfo
+*.tsbuildinfo # More general pattern if you might have multiple tsconfig files
 
 # IDE specific
 .idea/
@@ -219,3 +221,8 @@ dist/
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Custom ignores
+.git
+cp.py
+temp.txt

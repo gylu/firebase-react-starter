@@ -214,6 +214,8 @@ def main():
         custom_patterns.append('*.ipynb')
     # Always ignore pack-lock.json by default
     custom_patterns.append('package-lock.json')
+    custom_patterns.append('.gitignore')
+    custom_patterns.append('README.md')
 
     # Generate structure and contents
     tree = get_directory_structure(start_dir, start_dir, args.depth, gitignore_spec, custom_patterns)

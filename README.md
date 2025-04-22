@@ -89,45 +89,51 @@ cd <repository-directory-name>
     * Firebase will provide you with a configuration object (`firebaseConfig`). **Copy this object.**
 3.  **Configure Frontend:**
     * Open the `frontend/src/config/firebaseConfig.ts` file.
-    * **Replace the placeholder `firebaseConfig` object with the actual configuration you copied in step 2.**
+    * **Replace the placeholder `firebaseConfig` object with the actual configuration you copied in step 2.** (Your file shows you've already done this, which is great!)
 
     ```typescript
     // frontend/src/config/firebaseConfig.ts
-    import { initializeApp } from "firebase/app";
-    import { getAuth } from "firebase/auth";
-    import { getFirestore } from "firebase/firestore";
-
-    // TODO: Replace with your actual Firebase project configuration
+    // ... (keep the rest of your firebaseConfig.ts content)
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "YOUR_API_KEY", // Or your actual key
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // Or your actual domain
+      projectId: "YOUR_PROJECT_ID", // Or your actual ID
+      storageBucket: "YOUR_PROJECT_ID.appspot.com", // Or your actual bucket
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Or your actual sender ID
+      appId: "YOUR_APP_ID" // Or your actual app ID
+      // measurementId is optional but good to include if you use Analytics
     };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    export { app, auth, db };
+    // ... (keep the rest of your firebaseConfig.ts content: initializeApp, getAuth, etc.)
     ```
 
-4.  **Install Firebase CLI:**
-    * If you don't have it, install the Firebase CLI: `npm install -g firebase-tools`
-    * Log in to Firebase: `firebase login`
-5.  **Enable Authentication Methods:**
+4.  **Install Firebase CLI & Login:**
+    * If you don't have it, install the Firebase CLI globally: `npm install -g firebase-tools`
+    * Log in to your Firebase account: `firebase login`
+5.  **Initialize Firebase in Your Frontend Directory:**
+    * Navigate to your frontend project's root directory:
+        ```bash
+        cd frontend
+        ```
+    * Run the initialization command:
+        ```bash
+        firebase init
+        ```
+    * Follow the prompts:
+        * Select **Hosting: Configure files for Firebase Hosting...** (use Spacebar, then Enter).
+        * Choose **Use an existing project** and select the Firebase project you created.
+        * Set your public directory to **`dist`**. (This is where Vite builds your production assets).
+        * Configure as a single-page app (SPA)? **Yes**.
+        * Set up automatic builds and deploys with GitHub? **No** (for manual deployment).
+        * If it asks to overwrite `dist/index.html`, choose **No**. `firebase init` primarily sets up `firebase.json` and `.firebaserc`.
+6.  **Enable Authentication Methods (if using Auth):**
     * In the Firebase Console, go to "Authentication" (under Build).
     * Click the "Sign-in method" tab.
-    * Enable the "Google" provider. Provide a project support email.
-    * Enable the "Phone" provider. You might need to configure authorized domains for reCAPTCHA verification if prompted (Firebase Hosting domains are usually authorized by default).
-6.  **Set Up Firestore:**
+    * Enable the providers you need (e.g., "Google", "Phone"). Configure them as required.
+7.  **Set Up Firestore (if using Firestore):**
     * Go to "Firestore Database" (under Build).
     * Click "Create database".
-    * Choose **Start in test mode** for initial development (allows reads/writes without authentication rules). **Remember to set up proper security rules before going live!**
-    * Select a location for your database (choose one close to your users).
+    * Choose **Start in test mode** for initial development (allows reads/writes without strict rules). **Remember to set up proper security rules before production!**
+    * Select a location for your database.
 
 ## 3. Running the Frontend Locally
 
@@ -161,18 +167,15 @@ cd <repository-directory-name>
     ```bash
     npm run build
     ```
-    This creates an optimized build in the `frontend/dist` directory.
+    This command uses Vite to compile your React/TypeScript code and assets into the `frontend/dist` directory, which you configured as your public directory during `firebase init`.
 3.  **Deploy to Firebase Hosting:**
     ```bash
-    firebase deploy --only hosting
+    firebase deploy
     ```
-    * The first time you run this, the Firebase CLI might ask you to configure hosting settings:
-        * Select the Firebase project you created earlier.
-        * Specify `dist` as the public directory.
-        * Configure as a single-page app (SPA): **Yes** (important for React Router).
-        * Set up automatic builds and deploys with GitHub: **No** (for this manual setup).
-        * File `dist/index.html` already exists. Overwrite? **No** (or Yes, it doesn't matter much here as `npm run build` regenerates it).
-    * Firebase will provide you with the URL of your deployed site (e.g., `https://your-project-id.web.app`).
+    * This command uploads the contents of your `dist` directory to Firebase Hosting.
+    * Since you already configured Hosting settings during `firebase init`, it should deploy directly to the correct project.
+    * You can use `firebase deploy --only hosting` if you have other Firebase features (like Functions) configured and only want to update the hosted website.
+    * Firebase CLI will output the URL of your deployed site (e.g., `https://your-project-id.web.app`).
 
 ## 5. Connecting a Custom Domain (Example: Namecheap)
 
