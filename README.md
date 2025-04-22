@@ -87,17 +87,7 @@ cd <repository-directory-name>
     * Give it a nickname (e.g., `My Web App`).
     * **Crucially:** Enable **Firebase Hosting** for this app during setup or later in the Hosting tab.
     * Firebase will provide you with a configuration object (`firebaseConfig`). **Copy this object.**
-3.  **Enable Authentication Methods:**
-    * In the Firebase Console, go to "Authentication" (under Build).
-    * Click the "Sign-in method" tab.
-    * Enable the "Google" provider. Provide a project support email.
-    * Enable the "Phone" provider. You might need to configure authorized domains for reCAPTCHA verification if prompted (Firebase Hosting domains are usually authorized by default).
-4.  **Set Up Firestore:**
-    * Go to "Firestore Database" (under Build).
-    * Click "Create database".
-    * Choose **Start in test mode** for initial development (allows reads/writes without authentication rules). **Remember to set up proper security rules before going live!**
-    * Select a location for your database (choose one close to your users).
-5.  **Configure Frontend:**
+3.  **Configure Frontend:**
     * Open the `frontend/src/config/firebaseConfig.ts` file.
     * **Replace the placeholder `firebaseConfig` object with the actual configuration you copied in step 2.**
 
@@ -125,9 +115,19 @@ cd <repository-directory-name>
     export { app, auth, db };
     ```
 
-6.  **Install Firebase CLI:**
+4.  **Install Firebase CLI:**
     * If you don't have it, install the Firebase CLI: `npm install -g firebase-tools`
     * Log in to Firebase: `firebase login`
+5.  **(Optional) Enable Authentication Methods:**
+    * In the Firebase Console, go to "Authentication" (under Build).
+    * Click the "Sign-in method" tab.
+    * Enable the "Google" provider. Provide a project support email.
+    * Enable the "Phone" provider. You might need to configure authorized domains for reCAPTCHA verification if prompted (Firebase Hosting domains are usually authorized by default).
+6.  **(Optional)Set Up Firestore:**
+    * Go to "Firestore Database" (under Build).
+    * Click "Create database".
+    * Choose **Start in test mode** for initial development (allows reads/writes without authentication rules). **Remember to set up proper security rules before going live!**
+    * Select a location for your database (choose one close to your users).
 
 ## 3. Setting Up Google Cloud Platform (for Cloud Run Backend)
 
