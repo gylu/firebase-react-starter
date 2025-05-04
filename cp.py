@@ -9,30 +9,30 @@ default and allows for additional custom ignore patterns.
 
 Features:
 * Generates a tree-like view of the directory structure, showing all items not
-    excluded by ignore rules.
+  excluded by ignore rules.
 * Optionally includes the full content of files within the specified depth.
 * Respects `.gitignore` rules found in the repository root by default (requires
-    `pathspec` library for full accuracy, falls back to basic matching).
+  `pathspec` library for full accuracy, falls back to basic matching).
 * Allows disabling `.gitignore` processing (`--no-gitignore`).
 * Accepts custom ignore patterns (e.g., `*.log`, `temp/`).
-* Allows specifying an include pattern (`--include`) which filters **only** which
-    file **contents** are displayed. The directory structure remains unfiltered
-    (respecting only ignore rules). Matching is case-insensitive and supports
-    wildcards.
+* Allows specifying one or more include patterns (`--include`) which filter
+  **only** which file **contents** are displayed. The directory structure remains
+  unfiltered (respecting only ignore rules). Matching is case-insensitive and
+  supports wildcards.
 * Controls the maximum depth of directory traversal.
 * Optionally copies the output directly to the system clipboard (`-c` or
-    `--clipboard`, requires `pyperclip`).
+  `--clipboard`, requires `pyperclip`).
 * Defaults to ignoring `.ipynb`, `*lock.json` (e.g., `package-lock.json`),
-    `.git/`, `__pycache__/`, `node_modules/` (can be overridden by modifying
-    the script's defaults or using --no-gitignore).
+  `.git/`, `__pycache__/`, `node_modules/` (can be overridden by modifying
+  the script's defaults or using --no-gitignore).
 
 Dependencies:
 * Python 3
 * Optional:
     * `pathspec`: For full and accurate `.gitignore` pattern matching. Install via
-        `pip install pathspec`. If not installed, a basic fallback matching is used.
+      `pip install pathspec`. If not installed, a basic fallback matching is used.
     * `pyperclip`: To enable copying output to the clipboard (`-c` / `--clipboard`).
-        Install via `pip install pyperclip`.
+      Install via `pip install pyperclip`.
 
 Usage:
     python cp.py [start_dir] [depth] [contents] [ignore_ipynb] [custom_ignore...] [options]
@@ -42,15 +42,15 @@ Arguments:
 * depth: Maximum depth to traverse. Use `-1` for unlimited depth (default: `3`).
 * contents: Whether to include file contents (`True` or `False`, default: `True`).
 * ignore_ipynb: Whether to automatically ignore `*.ipynb` files (`True` or `False`,
-    default: `True`).
+  default: `True`).
 * custom_ignore...: Zero or more custom glob patterns to ignore (e.g., `*.tmp`,
-    `docs/`).
+  `docs/`).
 
 Options:
 * --no-gitignore: Disable reading and processing `.gitignore` files.
-* --include PATTERN: Filter file **contents** to ONLY show those from files
-    matching `PATTERN`. The directory structure will still show all non-ignored
-    items. Matching is case-insensitive, wildcards allowed.
+* --include PATTERN [PATTERN ...]: Filter file **contents** to ONLY show those from files
+  matching **any** of the specified `PATTERN`(s). The directory structure will
+  still show all non-ignored items. Matching is case-insensitive, wildcards allowed.
 * -c, --clipboard: Copy the final output to the system clipboard.
 
 Examples:
@@ -77,18 +77,26 @@ Examples:
     python cp.py --include "*.py"
     ```
 
-4.  Include Specific File Content, No Gitignore:
+4.  Include Python and YAML File Contents:
+    Show the *full* directory structure (respecting ignores), but only
+    include the content of files ending with `.py` OR `.yaml`.
+    ```bash
+    python cp.py --include "*.py" "*.yaml"
+    ```
+
+5.  Include Specific File Content, No Gitignore:
     Show the *full* directory structure (ignoring `.gitignore`), but only
     display the content for `config.yaml`.
     ```bash
     python cp.py --include "config.yaml" --no-gitignore
     ```
 
-5.  Custom Ignore, Include Specific Contents, To Clipboard:
+6.  Custom Ignore, Include Specific Contents, To Clipboard:
     Show full structure (respecting `.gitignore`), ignore `*.log` files,
-    only show contents of files starting with `data_`, copy to clipboard.
+    only show contents of files starting with `data_` OR ending with `.csv`,
+    copy to clipboard.
     ```bash
-    python cp.py . 5 --include "data_*" -c '*.log'
+    python cp.py . 5 --include "data_*" "*.csv" -c '*.log'
     ```
 
 Note: Ignore rules (`.gitignore`, custom patterns, defaults) always apply to both
@@ -166,10 +174,10 @@ def should_ignore(path, start_dir, gitignore_spec, custom_patterns):
             if PATHSPEC_AVAILABLE and isinstance(gitignore_spec, pathspec.PathSpec):
                  # pathspec handles files and directories (including those matching patterns without trailing slash)
                  if gitignore_spec.match_file(rel_repo_path):
-                      return True
+                     return True
                  # Explicitly check with trailing slash for directory patterns if pathspec needs it
                  if is_dir and gitignore_spec.match_file(rel_repo_path + '/'):
-                     return True
+                    return True
 
             elif isinstance(gitignore_spec, list): # Fallback using raw patterns
                 for pat in gitignore_spec:
@@ -186,7 +194,7 @@ def should_ignore(path, start_dir, gitignore_spec, custom_patterns):
                          return True
                     # Check if directory matches a file pattern (e.g., 'build' pattern ignoring 'build/' dir)
                     if is_dir and (fnmatch.fnmatch(rel_repo_path, pat) or fnmatch.fnmatch(item_name, pat)):
-                         return True
+                        return True
 
         except ValueError:
             # Path is not relative to GITIGNORE_ROOT (e.g., different drive)
@@ -214,17 +222,21 @@ def should_ignore(path, start_dir, gitignore_spec, custom_patterns):
          # Path is not relative to start_dir
          pass
     except Exception as e:
-         print(f"Warning: Error during custom ignore check for {path}: {e}", file=sys.stderr)
+        print(f"Warning: Error during custom ignore check for {path}: {e}", file=sys.stderr)
 
     return False
 
-# This function is now ONLY used by get_file_contents
-def should_include(name, include_pattern):
-    """Check if a name matches the include pattern (case-insensitive)."""
-    if not include_pattern:
-        return True # No include pattern means contents are included (if not ignored)
+# MODIFIED: Takes a list of patterns
+def should_include(name, include_patterns):
+    """Check if a name matches ANY of the include patterns (case-insensitive)."""
+    if not include_patterns:
+        return True # No include patterns means contents are included (if not ignored)
     # Use lower() for consistent case-insensitivity
-    return fnmatch.fnmatch(name.lower(), include_pattern.lower())
+    name_lower = name.lower()
+    for pattern in include_patterns:
+        if fnmatch.fnmatch(name_lower, pattern.lower()):
+            return True # Match found
+    return False # No match found in any pattern
 
 # MODIFIED: Removed include_pattern logic from this function
 def get_directory_structure(path, start_dir, max_depth, gitignore_spec, custom_patterns, depth=0):
@@ -271,7 +283,7 @@ def get_directory_structure(path, start_dir, max_depth, gitignore_spec, custom_p
         for d in dirs:
             dir_path = os.path.join(path, d)
             if not should_ignore(dir_path, start_dir, gitignore_spec, custom_patterns):
-                # Recursive call NO LONGER needs include_pattern
+                # Recursive call NO LONGER needs include_patterns
                 subtree_str = get_directory_structure(
                     dir_path, start_dir, max_depth, gitignore_spec,
                     custom_patterns, depth + 1
@@ -302,18 +314,30 @@ def get_directory_structure(path, start_dir, max_depth, gitignore_spec, custom_p
             if subtree_lines:
                 first_line = subtree_lines[0]
                 # Find the name in the first line "  └─ dirname/" to prepend correctly
-                name_start_index = first_line.find(os.path.basename(entry['name']))
-                if name_start_index != -1:
-                     lines.append(f"{item_indent}{connector} {first_line[name_start_index:]}")
-                     lines.extend(subtree_lines[1:]) # Add rest of indented lines
-                else: # Fallback
+                # Use os.path.basename to handle potential nested structures correctly
+                base_name = os.path.basename(entry['name'])
+                try:
+                    # Find the last occurrence of the basename to handle cases like dir/dir/
+                    name_start_index = first_line.rindex(base_name)
+                    # Ensure we don't accidentally match part of the indent/connector
+                    if name_start_index > len(item_indent) + len(connector):
+                         lines.append(f"{item_indent}{connector} {first_line[name_start_index:]}")
+                         # Adjust indentation for subsequent lines based on the *new* prefix
+                         sub_indent = " " * (len(item_indent) + len(connector) + 1 + name_start_index - len(first_line.lstrip()))
+                         lines.extend([sub_indent + line for line in subtree_lines[1:]])
+                    else: # Fallback if index seems wrong
+                         lines.append(f"{item_indent}{connector} {first_line.lstrip()}") # Add first line, stripping its indent
+                         lines.extend([item_indent + "  " + line for line in subtree_lines[1:]]) # Indent rest relative to current
+                except ValueError: # Fallback if rindex fails
                      lines.append(f"{item_indent}{connector} [Error reconstructing subtree for {entry['name']}]")
+                     print(f"Debug: Could not find '{base_name}' in '{first_line}'", file=sys.stderr) # Debugging help
 
     return '\n'.join(lines)
 
-# UNCHANGED: This function still uses include_pattern to filter contents
-def get_file_contents(path, start_dir, max_depth, gitignore_spec, custom_patterns, include_pattern, depth=0):
-    """Recursively gets contents of files respecting ignore patterns AND include pattern for filtering."""
+
+# MODIFIED: Takes include_patterns (plural)
+def get_file_contents(path, start_dir, max_depth, gitignore_spec, custom_patterns, include_patterns, depth=0):
+    """Recursively gets contents of files respecting ignore patterns AND include patterns for filtering."""
     if not os.path.isdir(path) or (max_depth != -1 and depth > max_depth):
         return ''
 
@@ -335,25 +359,26 @@ def get_file_contents(path, start_dir, max_depth, gitignore_spec, custom_pattern
     for file in files:
         file_path = os.path.join(path, file)
         if not should_ignore(file_path, start_dir, gitignore_spec, custom_patterns):
-            # *** Include pattern check happens HERE for contents ***
-            if should_include(file, include_pattern):
+            # *** Include patterns check happens HERE for contents ***
+            if should_include(file, include_patterns): # Pass the list of patterns
                 abs_file_path = os.path.abspath(file_path)
-                out_parts.append(f"\n--- File: {abs_file_path} ---")
+                rel_file_path = os.path.relpath(abs_file_path, start_dir) # Use relative path for output clarity
+                out_parts.append(f"\n--- File: {rel_file_path} ---")
                 try:
                     with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
                         out_parts.append(f.read())
                 except Exception as e:
-                    out_parts.append(f"<<Error reading file {abs_file_path}: {e}>>")
+                    out_parts.append(f"<<Error reading file {rel_file_path}: {e}>>")
 
     # Recurse into subdirectories if not ignored
     if max_depth == -1 or depth < max_depth:
         for d in dirs:
             dir_path = os.path.join(path, d)
             if not should_ignore(dir_path, start_dir, gitignore_spec, custom_patterns):
-                 # Recursive call still needs include_pattern to filter files deeper down
+                 # Recursive call still needs include_patterns to filter files deeper down
                  contents_subtree = get_file_contents(
                      dir_path, start_dir, max_depth, gitignore_spec,
-                     custom_patterns, include_pattern, depth + 1
+                     custom_patterns, include_patterns, depth + 1 # Pass list
                  )
                  if contents_subtree:
                      out_parts.append(contents_subtree)
@@ -396,10 +421,11 @@ def main():
         '--no-gitignore', action='store_true',
         help='Disable .gitignore processing'
         )
-    # Include arg (help text updated)
+    # Include arg (MODIFIED: accepts multiple patterns)
     parser.add_argument(
-        '--include', default=None,
-        help='Filter file CONTENTS to only show those matching PATTERN (case-insensitive, wildcards ok). Structure is unaffected.'
+        '--include', nargs='+', default=None, # Use nargs='+' to accept one or more
+        metavar='PATTERN', # Clarify expected value in help
+        help='Filter file CONTENTS to only show those matching ANY specified PATTERN (case-insensitive, wildcards ok). Structure is unaffected.'
         )
     # Output args
     parser.add_argument(
@@ -458,8 +484,10 @@ def main():
         f"Max Depth: {'Unlimited' if args.depth == -1 else args.depth}",
         gitignore_message
     ]
+    # MODIFIED: Handle list of include patterns
     if args.include:
-         header_info.append(f"Include Filter (Contents Only): '{args.include}'")
+         include_patterns_str = ', '.join([f"'{p}'" for p in args.include])
+         header_info.append(f"Include Filter (Contents Only): {include_patterns_str}")
 
     user_custom = args.custom or []
     default_ignores_in_use = []
@@ -485,12 +513,15 @@ def main():
 
     # Add basic info to the main output as well
     final_output.append(f"Directory: {start_dir_abs}")
-    if args.include: final_output.append(f"Contents Filter: '{args.include}'")
+    # MODIFIED: Handle list of include patterns in output header
+    if args.include:
+        include_patterns_str = ', '.join([f"'{p}'" for p in args.include])
+        final_output.append(f"Contents Filter: {include_patterns_str}")
     final_output.append("=" * 20) # Separator
 
 
     try:
-        # Generate structure (NO include pattern needed here)
+        # Generate structure (NO include patterns needed here)
         structure = get_directory_structure(
             start_dir_abs, start_dir_abs, args.depth, gitignore_spec,
             custom_patterns
@@ -502,17 +533,18 @@ def main():
              final_output.append("Directory Structure: (No items found or all ignored)")
 
 
-        # Generate contents (include pattern IS needed here)
+        # Generate contents (include patterns ARE needed here)
         if args.contents:
+            # Pass the list of include patterns (args.include)
             contents = get_file_contents(
                 start_dir_abs, start_dir_abs, args.depth, gitignore_spec,
-                custom_patterns, args.include # Pass include pattern here
+                custom_patterns, args.include # Pass the list here
             )
             if contents:
                 final_output.append("\n" + ("=" * 20) + "\nFile Contents:")
                 final_output.append(contents)
             elif structure and args.include: # Structure existed, but no contents matched include
-                 final_output.append("\n" + ("=" * 20) + "\nFile Contents: (No file contents matched the include filter)")
+                 final_output.append("\n" + ("=" * 20) + "\nFile Contents: (No file contents matched the include filter(s))")
             elif structure: # Structure existed, but no files or all files empty/unreadable
                  final_output.append("\n" + ("=" * 20) + "\nFile Contents: (No files found or content could not be read)")
 
